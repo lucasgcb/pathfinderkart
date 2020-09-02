@@ -284,10 +284,12 @@
 #include "partest.h"
 #include "demo-tasks.h"
 #include "conf_example.h"
+#include <adc.h>
 #include <board.h>
 #include <ioport.h>
 /* ASF includes. */
 #include "sysclk.h"
+
 
 /* Defines the LED toggled to provide visual feedback that the system is
  * running.  The rate is defined in milliseconds, then converted to RTOS ticks
@@ -486,17 +488,32 @@ int main(void)
 }
 
 /*-----------------------------------------------------------*/
-
-
+void ADC_Handler(void)
+{
+	if ((adc_get_status(ADC) & ADC_ISR_DRDY) == ADC_ISR_DRDY) 
+	{
+		result_adc = adc_get_latest_value(ADC);
+		result_adc = adc_get_channel_value(ADC,ADC_CHANNEL_13);
+	}
+}
 void vTaskFunction( void * pvParameters )
 {
 	/* Block for 500ms. */
+	result_adc=0;
 	const TickType_t xDelay = 10 / portTICK_PERIOD_MS;
-
+	pmc_enable_periph_clk(ID_ADC);
+	adc_init(ADC, sysclk_get_cpu_hz(), 6400000, ADC_STARTUP_TIME_4);
+	adc_configure_timing(ADC, 1, ADC_SETTLING_TIME_3, 1);
+	adc_enable_tag(ADC);
+	adc_enable_channel(ADC, ADC_CHANNEL_13);
+	adc_enable_interrupt(ADC, ADC_IER_DRDY);
+	NVIC_EnableIRQ(ADC_IRQn);
+	
 	for( ;; )
 	{
 		/* Simply toggle the LED every 500ms, blocking between each toggle. */
 		Rodar_Maquina();
+		adc_start(ADC);
 		vTaskDelay( xDelay );
 	}
 	

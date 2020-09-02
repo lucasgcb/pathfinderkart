@@ -30,6 +30,10 @@ src\ASF\common\utils\stdio\write.c
 
 src\ASF\sam\boards\arduino_due_x\init.c
 
+src\ASF\sam\drivers\adc\adc.c
+
+src\ASF\sam\drivers\adc\adc_sam3u.c
+
 src\ASF\sam\drivers\pdc\pdc.c
 
 src\ASF\sam\drivers\pio\pio.c

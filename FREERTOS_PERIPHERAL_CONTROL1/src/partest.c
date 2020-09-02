@@ -103,6 +103,7 @@ void vParTestInitialise(void)
 	for (ul = 0; ul < partestNUM_LEDS; ul++) {
 		/* Configure the LED, before ensuring it starts in the off
 		state. */
+		//REG_ADC_CR
 		ioport_set_pin_dir(ulLED[ ul ], IOPORT_DIR_OUTPUT);
 		ioport_set_pin_dir(IN11, IOPORT_DIR_OUTPUT);
 		ioport_set_pin_dir(IN12, IOPORT_DIR_OUTPUT);

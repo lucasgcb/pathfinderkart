@@ -43,7 +43,6 @@
 
 /* Atmel library includes. */
 #include "freertos_usart_serial.h"
-
 /* Demo includes. */
 #include "demo-tasks.h"
 
@@ -127,7 +126,6 @@ void create_usart_echo_test_tasks(Usart *usart_base,
 }
 
 /*-----------------------------------------------------------*/
-
 static void usart_echo_tx_task(void *pvParameters)
 {
 	freertos_usart_if usart_port;
@@ -148,11 +146,16 @@ static void usart_echo_tx_task(void *pvParameters)
 	yet.  A block time of zero is used as the semaphore is guaranteed to be
 	there as it has only just been created. */
 	xSemaphoreTake(notification_semaphore, 0);
-
+	char result_txt[5] = "0000";
 	for (;;) {
-		
+		taskENTER_CRITICAL();
+		// Get latest digital data value from ADC and can be used by application
+		sprintf(result_txt,"%lu;",result_adc);
+		taskEXIT_CRITICAL();
+		//strcpy((char *) local_buffer,
+		//(const char *) estado_atual[SmState]);
 		strcpy((char *) local_buffer,
-		(const char *) estado_atual[SmState]);
+		(const char *) result_txt);
 		/* Data cannot be sent from Flash, so copy the string to RAM. */
 
 		/* Start send. */

@@ -9,7 +9,7 @@ typedef enum
 	STATE_MOVING_REVERSE,
 	NUM_STATES
 }StateType;
-
+uint32_t volatile result_adc;
 // Function Pointer for State Machines
 extern StateType SmState;
 

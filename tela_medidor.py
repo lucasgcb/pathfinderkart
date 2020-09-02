@@ -21,7 +21,7 @@ class janela(QMainWindow):
         ui_file = QFile("mover.ui")
         ui_file.open(QFile.ReadOnly)
         self.interface = loader.load(ui_file)
-        self.interface.setWindowTitle('HMS-X Hameg Receiver Scanner ')
+        self.interface.setWindowTitle('Projeto Integrador 2 - Carrinho Autônomo')
         ui_file.close()
         super(janela, self).__init__()
 

@@ -46,11 +46,13 @@ def scan(interface, running, interrupt, semafaro, detector, fname):
                 while(interrupt.is_set() is False and running.is_set()):
                     a = placa.read_until(b';')
                     lido = int(a.decode("utf-8").split(';')[0])
-                    percentual = int((lido - 2730)/(1366) * 100)
+                    volts = lido/1241
+                    percentual = int((lido - 3661)/(435) * 100)
                     if percentual < 0:
                         percentual = 0
                     print(lido)
-                    interface.label_bateria.setText(str(percentual) + '%')
+                    interface.label_bateria.setText(
+                        str(percentual) + '%' + " (" + str(round(volts, 2)) + "V)")
                     spamwriter.writerow([datetime.now().strftime(
                         "%d-%m-%Y %H-%M-%S"), str(percentual) + '%'])
             raise Interrupt_Error

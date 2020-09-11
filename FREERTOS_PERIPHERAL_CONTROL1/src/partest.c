@@ -73,6 +73,7 @@
 #include "task.h"
 
 /* Demo includes. */
+#include "globais.h"
 #include "partest.h"
 #include "conf_example.h"
 
@@ -104,6 +105,8 @@ void vParTestInitialise(void)
 		/* Configure the LED, before ensuring it starts in the off
 		state. */
 		//REG_ADC_CR
+		ioport_init();
+		REG_PIOC_PUDR = 0xFFFFFFFF;
 		ioport_set_pin_dir(ulLED[ ul ], IOPORT_DIR_OUTPUT);
 		ioport_set_pin_dir(IN11, IOPORT_DIR_OUTPUT);
 		ioport_set_pin_dir(IN12, IOPORT_DIR_OUTPUT);
@@ -111,6 +114,12 @@ void vParTestInitialise(void)
 		ioport_set_pin_dir(IN14, IOPORT_DIR_OUTPUT);
 		ioport_set_pin_dir(ENA1, IOPORT_DIR_OUTPUT);
 		ioport_set_pin_dir(ENB1, IOPORT_DIR_OUTPUT);
+		ioport_set_pin_dir(SENSOR_ESQUERDA, IOPORT_DIR_INPUT);
+		ioport_set_pin_dir(SENSOR_FRENTE, IOPORT_DIR_INPUT);
+		ioport_set_pin_dir(SENSOR_SAIDA, IOPORT_DIR_INPUT);
+		ioport_set_pin_dir(SENSOR_DIREITA, IOPORT_DIR_INPUT);
+		ioport_set_pin_dir(SENSOR_TRAS1, IOPORT_DIR_INPUT);
+		ioport_set_pin_dir(SENSOR_TRAS2, IOPORT_DIR_INPUT);
 		ioport_set_pin_level(IN11,LOW);
 		ioport_set_pin_level(IN12,LOW);
 		ioport_set_pin_level(IN13,LOW);

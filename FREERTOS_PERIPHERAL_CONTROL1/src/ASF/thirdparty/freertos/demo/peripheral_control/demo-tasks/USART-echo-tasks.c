@@ -36,6 +36,7 @@
 /* Standard includes. */
 #include <stdio.h>
 #include <string.h>
+#include <ioport.h>
 #include "globais.h"
 /* Kernel includes. */
 #include "FreeRTOS.h"
@@ -62,7 +63,7 @@
  * error is latched if any characters are missing.  A loopback connector is
  * required to ensure the transmitted characters are also received.
  */
-static void usart_echo_tx_task(void *pvParameters);
+//static void usart_echo_tx_task(void *pvParameters);
 static void usart_echo_rx_task(void *pvParameters);
 
 /*-----------------------------------------------------------*/
@@ -117,61 +118,12 @@ void create_usart_echo_test_tasks(Usart *usart_base,
 	configASSERT(freertos_usart);
 
 	/* Create the two tasks as described above. */
-	xTaskCreate(usart_echo_tx_task, (const signed char *const) "Tx",
-			stack_depth_words, (void *) freertos_usart,
-			task_priority, NULL);
 	xTaskCreate(usart_echo_rx_task, (const signed char *const) "Rx",
 			stack_depth_words, (void *) freertos_usart,
 			task_priority + 1, NULL);
 }
 
 /*-----------------------------------------------------------*/
-static void usart_echo_tx_task(void *pvParameters)
-{
-	freertos_usart_if usart_port;
-	
-	const portTickType time_out_definition = (100UL / portTICK_RATE_MS);
-	xSemaphoreHandle notification_semaphore;
-	status_code_t returned_status;
-
-	/* The (already open) USART port is passed in as the task parameter. */
-	usart_port = (freertos_usart_if)pvParameters;
-
-	/* Create the semaphore to be used to get notified of end of
-	transmissions. */
-	vSemaphoreCreateBinary(notification_semaphore);
-	configASSERT(notification_semaphore);
-
-	/* Start with the semaphore in the expected state - no data has been sent
-	yet.  A block time of zero is used as the semaphore is guaranteed to be
-	there as it has only just been created. */
-	xSemaphoreTake(notification_semaphore, 0);
-	char result_txt[5] = "0000";
-	for (;;) {
-		taskENTER_CRITICAL();
-		// Get latest digital data value from ADC and can be used by application
-		sprintf(result_txt,"%lu;",result_adc);
-		taskEXIT_CRITICAL();
-		//strcpy((char *) local_buffer,
-		//(const char *) estado_atual[SmState]);
-		strcpy((char *) local_buffer,
-		(const char *) result_txt);
-		/* Data cannot be sent from Flash, so copy the string to RAM. */
-
-		/* Start send. */
-		returned_status = freertos_usart_write_packet_async(usart_port,
-				local_buffer, strlen((char *) local_buffer),
-				time_out_definition, notification_semaphore);
-		configASSERT(returned_status == STATUS_OK);
-
-		/* The async version of the write function is being used, so wait for
-		the end of the transmission.  No CPU time is used while waiting for the
-		semaphore.*/
-		xSemaphoreTake(notification_semaphore, time_out_definition * 2);
-		vTaskDelay(500);
-		
-	}
-}
 
 /*-----------------------------------------------------------*/
 
@@ -185,9 +137,26 @@ static void usart_echo_rx_task(void *pvParameters)
 	usart_port = (freertos_usart_if)pvParameters;
 	uint8_t poot = 0;
 	uint8_t local[RX_BUFFER_SIZE];
+	
+	
+	const portTickType time_out_definition = (100UL / portTICK_RATE_MS);
+	xSemaphoreHandle notification_semaphore;
+	status_code_t returned_status;
+
+	/* Create the semaphore to be used to get notified of end of
+	transmissions. */
+	vSemaphoreCreateBinary(notification_semaphore);
+	configASSERT(notification_semaphore);
+
+	/* Start with the semaphore in the expected state - no data has been sent
+	yet.  A block time of zero is used as the semaphore is guaranteed to be
+	there as it has only just been created. */
+	xSemaphoreTake(notification_semaphore, 0);
+	char result_txt[5] = "0000";
+	uint32_t valor_sensor = 0;
 	for (;;) {
 		memset(rx_buffer, 0x00, sizeof(rx_buffer));
-
+		
 		received = freertos_usart_serial_read_packet(usart_port, rx_buffer,
 				1,
 				portMAX_DELAY);
@@ -212,11 +181,41 @@ static void usart_echo_rx_task(void *pvParameters)
 				SmState = STATE_STANDBY;
 				break;
 		}
+		taskENTER_CRITICAL();
+		// Get latest digital data value from ADC and can be used by application
+		sprintf(result_txt,"%lu;%d;%d;%d;%d;%d;%d;%s",result_adc,
+		ioport_get_pin_level(SENSOR_ESQUERDA),
+		ioport_get_pin_level(SENSOR_FRENTE),
+		ioport_get_pin_level(SENSOR_SAIDA),
+		ioport_get_pin_level(SENSOR_DIREITA),
+		ioport_get_pin_level(SENSOR_TRAS1), ioport_get_pin_level(SENSOR_TRAS2),
+		estado_atual[SmState] );
+		taskEXIT_CRITICAL();
+		strcpy((char *) local_buffer,
+		(const char *) result_txt);
+		/* Data cannot be sent from Flash, so copy the string to RAM. */
+
+		/* Start send. */
+		returned_status = freertos_usart_write_packet_async(usart_port,
+		local_buffer, strlen((char *) local_buffer),
+		time_out_definition, notification_semaphore);
+		configASSERT(returned_status == STATUS_OK);
+		
+		
+		xSemaphoreTake(notification_semaphore, time_out_definition * 2);
+		
+		///Enviar pos comand
+		//strcpy((char *) local_buffer,
+		//(const char *) estado_atual[SmState]);
+
+		/* The async version of the write function is being used, so wait for
+		the end of the transmission.  No CPU time is used while waiting for the
+		semaphore.*/
+		
 		/* Expect the next string the next time around. */
 		
 	}
 }
-
 /*-----------------------------------------------------------*/
 
 portBASE_TYPE are_usart_echo_tasks_still_running(void)

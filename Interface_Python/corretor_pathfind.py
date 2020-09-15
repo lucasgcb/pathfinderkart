@@ -8,56 +8,52 @@ import csv
 from datetime import datetime
 import time
 import serial
+from corretor_pathfind_defs import Pathfinder
+from corretor_cpt_defs import CPT
 
 
-def vigia(interface, running, interrupt, semafaro, detector, last_uart, last_state):
-    sensor_list = [
-        interface.botao_esquerda,
-        interface.botao_frente,
-        interface.botao_saida,
-        interface.botao_direita,
-        interface.botao_tras1,
-        interface.botao_tras2,
-    ]
+def corretor(interface, running, interrupt, semafaro, detector, last_state):
     sensor_state = ["0", "0", "0", "0", "0", "0"]
-    colors = {
-        "0": "color: green",
-        "1": "color: red"
-    }
     while(True):
         detector.acquire()
+        maq_CPT = CPT()
+        maq_Pathfinder = Pathfinder()
         if running.is_set() is False:
             return
         try:
             while(interrupt.is_set() is False and running.is_set()):
-                # fazer dicionario
-                txt = last_uart.get()
-                # print(txt)
                 try:
-                    # media de 10 amostras
-                    sensores = txt.decode("utf-8").split(';')[1:]
-
-                    if sensores != sensor_state:
-                        print("sensor update: " + str(sensor_state))
-                        sensor_state = sensores
-                        last_state.put(sensor_state)
+                    try:
+                        sensor_state = last_state.get(timeout=2)[:-1]
+                    except Exception as e:
+                        print("sensor update timeout")
+                        pass
+                    print("sensores:" + str(sensor_state))
+                    maq_Pathfinder.run(
+                        interface, sensor_state, maq_CPT.cpt_state)
+                    maq_CPT.run(interface, sensor_state,
+                                maq_Pathfinder.pathfinder_state)
                 except Exception as e:
-                    print(e)
+                    print("PAU NAS MAQUINA: " + str(e))
                     pass
         except (KeyboardInterrupt) as e:
             print("WATCH THREAD KILLED!" + str(e))
             try:
                 if running.is_set() is False:
+                    detector.release()
                     return
             except Exception:
                 if running.is_set() is False:
+                    detector.release()
                     return
 
         except Exception as e:
             print("watch thread died: " + str(e))
             try:
                 if running.is_set() is False:
+                    detector.release()
                     return
             except Exception:
                 if running.is_set() is False:
+                    detector.release()
                     return

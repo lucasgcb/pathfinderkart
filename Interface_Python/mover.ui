@@ -380,7 +380,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>f</string>
+    <string>p</string>
    </property>
   </widget>
   <widget class="QPushButton" name="botao_parar">

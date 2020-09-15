@@ -70,7 +70,7 @@ def scan(interface, running, interrupt, semafaro, detector, fname, last_uart):
                     placa.write(test.encode('utf-8'))
                     recebido_bluetooth = placa.read_until(b'#')
                     last_uart.put(recebido_bluetooth)
-                    # print(str(last_uart))
+                    # print(str(recebido_bluetooth))
 
                     if (time.time() - (anterior+1) > 0):
                         atualizar_csv_bateria(

@@ -11,6 +11,10 @@ import serial
 
 
 def vigia(interface, running, interrupt, semafaro, detector, last_uart, last_state):
+
+	#Recebe informações sobre sensores, transforma-os em uma lista.
+	#Verifica se houve modificação nos sensores.
+	#Se houver, coloque novo valor na queue.
     sensor_list = [
         interface.botao_esquerda,
         interface.botao_frente,

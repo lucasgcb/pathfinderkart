@@ -9,6 +9,8 @@ from datetime import datetime
 import time
 import serial
 
+#Envia e recebe informações para o microcontrolador. 
+#Grava nível de bateria e passa informações para queue.
 
 class Interrupt_Error(Exception):
     pass
@@ -49,6 +51,9 @@ def atualizar_csv_bateria(spamwriter, recebido_bluetooth, interface):
 
 
 def scan(interface, running, interrupt, semafaro, detector, fname, last_uart):
+	#Envia e recebe informações para o microcontrolador. 
+	#Envia informações recebidas para a queue.
+	#Grava nível de bateria a cada segundo.
     anterior = time.time()
     motor_names = {"SBY#": "Aguardando",
                    "FWD#": "Frente",

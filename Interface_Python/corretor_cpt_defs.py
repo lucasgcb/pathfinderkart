@@ -9,6 +9,9 @@ import time
 
 
 class CPT():
+	# Controle direto dos movimentos. 
+	# Movimento é ditado pela informação na interface, a qual a thread scanner tem acesso.
+	# Recebe direções do pathfinder para saber quais movimentos fazer.
     def __init__(self):
         self.cpt_state = "standby"
 

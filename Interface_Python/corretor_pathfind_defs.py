@@ -9,6 +9,8 @@ import time
 
 
 class Pathfinder():
+	# Ler sensores, e se estiver alinhado tente tomar decisões para achar o caminho.
+	# Não comanda os motores diretamente, a máquina CPT se procupa com os detalhes. Isso permite que seja gravada a rota.
     def __init__(self):
         self.pathfinder_state = "survey"
         self.state_pathfind_maps = {"standby": "ok",

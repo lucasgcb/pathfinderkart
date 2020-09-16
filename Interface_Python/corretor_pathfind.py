@@ -13,6 +13,9 @@ from corretor_cpt_defs import CPT
 
 
 def corretor(interface, running, interrupt, semafaro, detector, last_state):
+	#Recebe novas informações dos sensores em last_state
+	#Executa máquina de estados.
+	#Se não houver novas informações, continue.
     sensor_state = ["0", "0", "0", "0", "0", "0"]
     while(True):
         detector.acquire()
